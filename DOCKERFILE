@@ -1,28 +1,22 @@
-# Usar a imagem base do ASP.NET
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-WORKDIR /app
-EXPOSE 80
-
-# Usar a imagem do SDK do .NET para build
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+# Usar a imagem do SDK para a versão mais recente que suporte .NET 9.0
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 
-# Ajuste o caminho para corresponder à localização do seu .csproj
-COPY ["GitHubReposAPI.csproj", "GitHubReposAPI/"]
-RUN dotnet restore "GitHubReposAPI/GitHubReposAPI.csproj"  # Restaura as dependências
+# Copiar o .csproj
+COPY [GitHubReposAPI.csproj", "GitHubReposAPI/"]
+RUN dotnet restore "GitHubReposAPI.csproj"
 
-# Copiar o restante dos arquivos do projeto
+# Copiar os arquivos restantes
 COPY . .
-
 WORKDIR "/src"
 RUN dotnet build "GitHubReposAPI.csproj" -c Release -o /app/build
 
-# Publicar o aplicativo
+# Publicar
 FROM build AS publish
 RUN dotnet publish "GitHubReposAPI.csproj" -c Release -o /app/publish
 
-# Usar a imagem base para a execução do aplicativo
-FROM base AS final
+# Usar a imagem base para execução
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
 WORKDIR /app
-COPY --from=publish /app/publish .  # Copia os arquivos publicados
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "GitHubReposAPI.dll"]
