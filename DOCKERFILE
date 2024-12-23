@@ -8,18 +8,18 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
 # Ajuste o caminho para corresponder à localização do seu .csproj
-COPY ["GitHubReposAPI/GitHubReposAPI.csproj", "GitHubReposAPI/"]
+COPY ["GitHubReposAPI.csproj", "GitHubReposAPI/"]
 RUN dotnet restore "GitHubReposAPI/GitHubReposAPI.csproj"  # Restaura as dependências
 
 # Copiar o restante dos arquivos do projeto
 COPY . .
 
 WORKDIR "/src"
-RUN dotnet build "GitHubReposAPI/GitHubReposAPI.csproj" -c Release -o /app/build
+RUN dotnet build "GitHubReposAPI.csproj" -c Release -o /app/build
 
 # Publicar o aplicativo
 FROM build AS publish
-RUN dotnet publish "GitHubReposAPI/GitHubReposAPI.csproj" -c Release -o /app/publish
+RUN dotnet publish "GitHubReposAPI.csproj" -c Release -o /app/publish
 
 # Usar a imagem base para a execução do aplicativo
 FROM base AS final
